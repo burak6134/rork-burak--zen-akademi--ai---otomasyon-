@@ -2,20 +2,18 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator, StyleSheet, Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore } from "@/store/themeStore";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-SplashScreen.preventAutoHideAsync();
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
     },
   },
 });
@@ -30,33 +28,19 @@ function RootLayoutNav() {
       ) : (
         <>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen 
-            name="course/[id]" 
-            options={{ 
-              presentation: "card",
-              headerShown: true,
-            }} 
+          <Stack.Screen
+            name="course/[id]"
+            options={{ presentation: "card", headerShown: true }}
           />
-          <Stack.Screen 
-            name="lesson/[id]" 
-            options={{ 
-              presentation: "card",
-              headerShown: true,
-            }} 
+          <Stack.Screen
+            name="lesson/[id]"
+            options={{ presentation: "card", headerShown: true }}
           />
-          <Stack.Screen 
-            name="certificates/[id]" 
-            options={{ 
-              presentation: "card",
-              headerShown: true,
-            }} 
+          <Stack.Screen
+            name="certificates/[id]"
+            options={{ presentation: "card", headerShown: true }}
           />
-          <Stack.Screen 
-            name="community" 
-            options={{ 
-              headerShown: false,
-            }} 
-          />
+          <Stack.Screen name="community" options={{ headerShown: false }} />
         </>
       )}
     </Stack>
@@ -66,60 +50,56 @@ function RootLayoutNav() {
 export default function RootLayout() {
   const { checkAuth } = useAuthStore();
   const { loadTheme } = useThemeStore();
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    const initializeApp = async () => {
+    const run = async () => {
       try {
-        console.log('[RootLayout] Starting app initialization...');
-        
-        // Set a timeout to prevent infinite loading
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Initialization timeout')), 10000)
+        console.log('[RootLayout] init');
+        if (Platform.OS !== 'web') {
+          await SplashScreen.preventAutoHideAsync().catch(() => {});
+        }
+        const timeoutMs = 2500;
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Initialization timeout')), timeoutMs)
         );
-        
         const initPromise = Promise.all([
-          checkAuth().catch(error => {
-            console.error('[RootLayout] Auth check failed:', error?.message || 'Unknown error');
+          checkAuth().catch((e) => {
+            console.error('[RootLayout] Auth check failed:', e?.message ?? e);
             return null;
           }),
-          loadTheme().catch(error => {
-            console.error('[RootLayout] Theme load failed:', error?.message || 'Unknown error');
+          loadTheme().catch((e) => {
+            console.error('[RootLayout] Theme load failed:', e?.message ?? e);
             return null;
           }),
         ]);
-        
         await Promise.race([initPromise, timeoutPromise]);
-        
-        console.log('[RootLayout] App initialization completed');
-      } catch (error) {
-        console.error('[RootLayout] App initialization failed:', error);
+      } catch (e) {
+        console.error('[RootLayout] init error', e);
       } finally {
         setIsInitialized(true);
-        // Hide splash screen after a short delay to ensure smooth transition
-        setTimeout(() => {
-          SplashScreen.hideAsync().catch(console.error);
-        }, 100);
+        if (Platform.OS !== 'web') {
+          setTimeout(() => {
+            SplashScreen.hideAsync().catch(() => {});
+          }, 100);
+        }
       }
     };
-
-    initializeApp();
+    run();
   }, [checkAuth, loadTheme]);
-
-  // Show loading screen while initializing
-  if (!isInitialized) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
-  }
 
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={styles.container}>
         <ErrorBoundary>
-          <RootLayoutNav />
+          <View style={styles.flex1}>
+            <RootLayoutNav />
+            {!isInitialized && (
+              <View style={styles.loadingOverlay} testID="app-loading-overlay">
+                <ActivityIndicator size="large" color="#007AFF" />
+              </View>
+            )}
+          </View>
         </ErrorBoundary>
       </GestureHandlerRootView>
     </QueryClientProvider>
@@ -127,13 +107,16 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  container: { flex: 1 },
+  flex1: { flex: 1 },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#000',
   },
 });
