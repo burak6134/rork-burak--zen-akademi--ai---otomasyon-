@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
 import { Play, Pause, SkipBack, SkipForward, Maximize, Minimize } from 'lucide-react-native';
 import { ThemedView } from './ThemedView';
@@ -116,19 +116,33 @@ export function VideoPlayer({ videoUrl, title, onProgress, onComplete, videoRef:
   return (
     <ThemedView style={[styles.container, isFullscreen && styles.fullscreenContainer]}>
       <View style={[styles.videoContainer, getVideoContainerStyle()]}>
-        <Video
-          ref={videoRef}
-          source={{ uri: videoUrl }}
-          style={styles.video}
-          resizeMode={ResizeMode.CONTAIN}
-          shouldPlay={false}
-          isLooping={false}
-          onPlaybackStatusUpdate={handleStatusUpdate}
-          onTouchStart={() => setShowControls(!showControls)}
-        />
+        {Platform.OS === 'web' ? (
+          <View style={styles.webVideoWrapper} testID="web-video-wrapper">
+            {/* eslint-disable-next-line react/no-unknown-property */}
+            {React.createElement('video', {
+              controls: true,
+              src: videoUrl,
+              style: { width: '100%', height: '100%', backgroundColor: '#000' },
+              onPlay: () => setShowControls(true),
+              onPause: () => setShowControls(true),
+            })}
+          </View>
+        ) : (
+          <Video
+            ref={videoRef}
+            source={{ uri: videoUrl }}
+            style={styles.video}
+            resizeMode={ResizeMode.CONTAIN}
+            shouldPlay={false}
+            isLooping={false}
+            onPlaybackStatusUpdate={handleStatusUpdate}
+            onTouchStart={() => setShowControls(!showControls)}
+            testID="rn-video"
+          />
+        )}
         
         {showControls && (
-          <View style={[styles.controlsOverlay, { backgroundColor: theme.background + '80' }]}>
+          <View style={[styles.controlsOverlay, { backgroundColor: theme.background + '80' }]} testID="video-controls">
             <View style={styles.topControls}>
               <ThemedText type="h3" style={styles.videoTitle}>
                 {title}
@@ -218,6 +232,11 @@ const styles = StyleSheet.create({
   video: {
     width: '100%',
     height: '100%',
+  },
+  webVideoWrapper: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#000000',
   },
   controlsOverlay: {
     position: 'absolute',
