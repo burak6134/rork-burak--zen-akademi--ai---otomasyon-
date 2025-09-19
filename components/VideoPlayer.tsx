@@ -28,22 +28,26 @@ export function VideoPlayer({ videoUrl, title, onProgress, onComplete, videoRef:
   
   const [status, setStatus] = useState<AVPlaybackStatus | null>(null);
   const [showControls, setShowControls] = useState(true);
-  const [screenData, setScreenData] = useState(getScreenDimensions());
+  const [screenData, setScreenData] = useState(() => ({ width: 0, height: 0, isLandscape: false }));
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [mounted, setMounted] = useState<boolean>(Platform.OS !== 'web' ? true : false);
 
   useEffect(() => {
+    if (Platform.OS === 'web') {
+      setScreenData(getScreenDimensions());
+      setMounted(true);
+    } else {
+      setScreenData(getScreenDimensions());
+    }
     const subscription = Dimensions.addEventListener('change', () => {
       const newScreenData = getScreenDimensions();
       setScreenData(newScreenData);
-      
-      // Auto-fullscreen in landscape on phones
       if (newScreenData.isLandscape && newScreenData.width < 768) {
         setIsFullscreen(true);
       } else if (!newScreenData.isLandscape) {
         setIsFullscreen(false);
       }
     });
-
     return () => subscription?.remove();
   }, []);
 
@@ -113,16 +117,19 @@ export function VideoPlayer({ videoUrl, title, onProgress, onComplete, videoRef:
     };
   };
 
+  if (Platform.OS === 'web' && !mounted) {
+    return <View style={{ width: '100%', height: 200 }} testID="video-web-placeholder" />;
+  }
+
   return (
     <ThemedView style={[styles.container, isFullscreen && styles.fullscreenContainer]}>
-      <View style={[styles.videoContainer, getVideoContainerStyle()]}>
+      <View style={[styles.videoContainer, getVideoContainerStyle()]} testID="video-container">
         {Platform.OS === 'web' ? (
           <View style={styles.webVideoWrapper} testID="web-video-wrapper">
-            {/* eslint-disable-next-line react/no-unknown-property */}
             {React.createElement('video', {
               controls: true,
               src: videoUrl,
-              style: { width: '100%', height: '100%', backgroundColor: '#000' },
+              style: { width: '100%', height: '100%', backgroundColor: '#000000' },
               onPlay: () => setShowControls(true),
               onPause: () => setShowControls(true),
             })}
