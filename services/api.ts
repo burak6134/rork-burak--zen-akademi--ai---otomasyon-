@@ -52,8 +52,8 @@ class ApiService {
   }
 
   private async mockRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Simulate shorter network delay to prevent hydration timeout
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     if (endpoint === '/wp-json/jwt-auth/v1/token' && options.method === 'POST') {
       return {
@@ -358,8 +358,8 @@ class ApiService {
   }
 
   async getQuiz(lessonId: number): Promise<Quiz> {
-    // Mock quiz data
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Mock quiz data with shorter delay
+    await new Promise(resolve => setTimeout(resolve, 50));
     return {
       id: lessonId * 10,
       lessonId,

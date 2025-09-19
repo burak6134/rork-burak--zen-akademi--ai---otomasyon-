@@ -22,7 +22,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           title: 'Ana Sayfa',
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
