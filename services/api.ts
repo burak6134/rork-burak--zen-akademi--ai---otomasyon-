@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { AuthResponse, Course, CourseDetail, CoursesResponse, MyCoursesResponse, Notification, ProgressUpdate, Quiz, User, VideoNote } from '@/types/api';
 
 const WP_BASE_URL = 'https://example.com';
@@ -52,8 +53,12 @@ class ApiService {
   }
 
   private async mockRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    // Simulate shorter network delay to prevent hydration timeout
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Minimal delay for web compatibility
+    if (Platform.OS === 'web') {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
 
     if (endpoint === '/wp-json/jwt-auth/v1/token' && options.method === 'POST') {
       return {

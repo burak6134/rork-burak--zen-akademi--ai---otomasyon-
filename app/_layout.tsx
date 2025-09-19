@@ -50,14 +50,7 @@ function RootLayoutNav() {
 export default function RootLayout() {
   const { checkAuth } = useAuthStore();
   const { loadTheme } = useThemeStore();
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const [mounted, setMounted] = useState<boolean>(Platform.OS !== 'web');
-
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      setMounted(true);
-    }
-  }, []);
+  const [isInitialized, setIsInitialized] = useState<boolean>(Platform.OS === 'web');
 
   useEffect(() => {
     const run = async () => {
@@ -66,11 +59,9 @@ export default function RootLayout() {
         if (Platform.OS !== 'web') {
           await SplashScreen.preventAutoHideAsync().catch(() => {});
         }
-        const timeoutMs = 2500;
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Initialization timeout')), timeoutMs)
-        );
-        const initPromise = Promise.all([
+        
+        // Simplified initialization without timeout for web compatibility
+        await Promise.all([
           checkAuth().catch((e) => {
             console.error('[RootLayout] Auth check failed:', e?.message ?? e);
             return null;
@@ -80,7 +71,8 @@ export default function RootLayout() {
             return null;
           }),
         ]);
-        await Promise.race([initPromise, timeoutPromise]);
+        
+        console.log('[RootLayout] init complete');
       } catch (e) {
         console.error('[RootLayout] init error', e);
       } finally {
@@ -92,16 +84,11 @@ export default function RootLayout() {
         }
       }
     };
-    run();
-  }, [checkAuth, loadTheme]);
-
-  if (Platform.OS === 'web' && !mounted) {
-    return (
-      <View style={styles.ssrShell} testID="ssr-shell">
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
-  }
+    
+    if (!isInitialized) {
+      run();
+    }
+  }, [checkAuth, loadTheme, isInitialized]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -132,11 +119,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000',
-  },
-  ssrShell: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
 });
