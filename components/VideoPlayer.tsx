@@ -6,7 +6,6 @@ import { ThemedView } from './ThemedView';
 import { ThemedText } from './ThemedText';
 import { colors, spacing } from '@/constants/theme';
 import { useThemeStore } from '@/store/themeStore';
-import * as ScreenOrientation from 'expo-screen-orientation';
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -89,18 +88,11 @@ export function VideoPlayer({ videoUrl, title, onProgress, onComplete, videoRef:
     }
   };
 
-  const toggleFullscreen = async () => {
+  const toggleFullscreen = () => {
     try {
-      if (isFullscreen) {
-        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-        setIsFullscreen(false);
-      } else {
-        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-        setIsFullscreen(true);
-      }
-    } catch {
-      console.log('Orientation lock not supported on this platform');
-      setIsFullscreen(!isFullscreen);
+      setIsFullscreen((prev) => !prev);
+    } catch (e) {
+      console.log('toggleFullscreen error', e);
     }
   };
 

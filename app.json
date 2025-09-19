@@ -18,7 +18,25 @@
       "bundleIdentifier": "com.rork.burakozenakademi",
       "requireFullScreen": false,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
+        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
+        "UIBackgroundModes": [
+          "audio"
+        ]
+      },
+      "usesIcloudStorage": true,
+      "entitlements": {
+        "com": {
+          "apple": {
+            "developer": {
+              "networking": {
+                "wifi-info": true
+              }
+            }
+          }
+        }
       }
     },
     "android": {
@@ -28,7 +46,11 @@
       },
       "package": "com.rork.burakozenakademi",
       "permissions": [
-        "INTERNET"
+        "INTERNET",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECORD_AUDIO"
       ]
     },
     "web": {
@@ -41,7 +63,24 @@
           "origin": "https://rork.com/"
         }
       ],
-      "expo-document-picker"
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
