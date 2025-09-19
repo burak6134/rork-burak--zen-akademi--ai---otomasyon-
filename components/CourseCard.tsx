@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, useWindowDimensions, Text, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, useWindowDimensions, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { Lock, Play } from 'lucide-react-native';
 import { Course } from '@/types/api';
@@ -128,9 +128,9 @@ export function CourseCard({ course, onPress, showProgress = true, width: cardWi
                     ]}
                   />
                 </View>
-                <Text style={{ color: theme.textMuted, fontSize: 12 }}>
+                <ThemedText type="caption" color="muted">
                   {progressText}
-                </Text>
+                </ThemedText>
               </View>
             )}
           </View>
