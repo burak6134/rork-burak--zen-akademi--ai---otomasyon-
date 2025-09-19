@@ -51,6 +51,13 @@ export default function RootLayout() {
   const { checkAuth } = useAuthStore();
   const { loadTheme } = useThemeStore();
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [mounted, setMounted] = useState<boolean>(Platform.OS !== 'web');
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      setMounted(true);
+    }
+  }, []);
 
   useEffect(() => {
     const run = async () => {
@@ -88,6 +95,14 @@ export default function RootLayout() {
     run();
   }, [checkAuth, loadTheme]);
 
+  if (Platform.OS === 'web' && !mounted) {
+    return (
+      <View style={styles.ssrShell} testID="ssr-shell">
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={styles.container}>
@@ -118,5 +133,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#000',
+  },
+  ssrShell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
