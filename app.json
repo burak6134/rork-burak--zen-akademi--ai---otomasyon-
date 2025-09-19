@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "İşini Otopilota Al",
+    "slug": "burak-ozen-akademi-ai-otomasyon",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rork.burakozenakademi",
+      "requireFullScreen": false
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.rork.burakozenakademi",
+      "permissions": [
+        "INTERNET"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      ["expo-router", { "origin": "https://rork.com/" }],
+      "expo-document-picker"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
