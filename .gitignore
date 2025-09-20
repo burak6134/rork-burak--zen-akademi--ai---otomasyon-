@@ -35,7 +35,3 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 .vercel
-
-# Native build klasörleri
-ios/
-android/
